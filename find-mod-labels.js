@@ -1,6 +1,6 @@
 module.exports = FindModLabels
 
-function FindModLabels(rekognition, imageData) {
+function FindModLabels(rekognition, imageData, callback) {
   var detectModLabelsParams = {
     Image: {
       Bytes: imageData.Body
@@ -10,8 +10,8 @@ function FindModLabels(rekognition, imageData) {
   rekognition.detectModerationLabels(detectModLabelsParams, function(err, data) {
     if (err) {
       console.log(err)
-      return
+      callback(err)
     }
-    return data
+    callback(null, data)
   })
 }

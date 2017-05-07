@@ -36,9 +36,12 @@ receiveMessage(sqs, function (err, s3Params) {
           var dimensions = output.split('x')
           var width = dimensions[0]
           var height = dimensions[1]
-          var modLabels = findModLabels(rekognition, imageData)
-          console.log(modLabels)
-          findFaces(rekognition, imageData, function(err, faceData) {
+          findModLabels(rekognition, imageData, function (err, data) {
+            if (err) {
+              console.log(err)
+            }
+            var modLabels = data
+                      findFaces(rekognition, imageData, function(err, faceData) {
             if (err) {
               console.log(err)
             }
@@ -71,8 +74,8 @@ receiveMessage(sqs, function (err, s3Params) {
                 })
               })
             })
-            // send message to Output SQS queue with moderation labels and location of output image
           })
+        })
       })
     })
   })

@@ -44,4 +44,5 @@ aws.credentials.json
 
 # Images
 *.jpg
+image.jpg
 
