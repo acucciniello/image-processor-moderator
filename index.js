@@ -1,5 +1,6 @@
 var AWS = require('aws-sdk')
 var im = require('imagemagick')
+var fs = require('fs')
 var parseSQS = require('./parse-sqs.js')
 var receiveMessage = require('./receive-message.js')
 var getObject = require('./get-object.js')
@@ -7,6 +8,8 @@ var saveImage = require('./save-image.js')
 var findFaces = require('./find-faces.js')
 var calculateCenter = require('./calculate-center.js')
 var findModLabels = require('./find-mod-labels.js')
+var saveObject = require('./save-object.js')
+var sendMessage = require('./send-message.js')
 
 AWS.config.loadFromPath('./aws.credentials.json')
 
@@ -34,6 +37,7 @@ receiveMessage(sqs, function (err, s3Params) {
           var width = dimensions[0]
           var height = dimensions[1]
           var modLabels = findModLabels(rekognition, imageData)
+          console.log(modLabels)
           findFaces(rekognition, imageData, function(err, faceData) {
             if (err) {
               console.log(err)
@@ -41,8 +45,32 @@ receiveMessage(sqs, function (err, s3Params) {
             var center = calculateCenter(faceData, width, height)
             console.log(center)
             // recenter image - TODO
-            // Save Image as 300 x 300 
-            // Store that image in s3 bucket
+            var fileName = 'img300crop.jpg'
+            im.crop({
+              srcPath: 'image.jpg',
+              dstPath: fileName,
+              height: 300,
+              width: 300,
+              gravity: 'Center'
+            }, function(err, stdout, stderr) {
+              if(err) {
+                console.log(err)
+              }
+              var cropData = fs.createReadStream(fileName)
+              saveObject(s3, cropData, fileName, function(err, data) {
+                if (err) {
+                  console.log(err)
+                }
+                console.log('image was saved in s3')
+                var s3Url = 'https://s3.amazonaws.com/image-processor-moderator/output/img300crop.jpg'
+                sendMessage(sqs, modLabels, s3Url, function (err, data) {
+                  if (err) {
+                    console.log(err)
+                  }
+                  console.log(data)
+                })
+              })
+            })
             // send message to Output SQS queue with moderation labels and location of output image
           })
       })
