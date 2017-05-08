@@ -1,6 +1,6 @@
 module.exports = CalculateCenter
 
-function CalculateCenter(data, width, height) {
+function CalculateCenter(data, width, height, callback) {
   var center = {
     column: 0,
     row: 0
@@ -17,5 +17,5 @@ function CalculateCenter(data, width, height) {
   center.column = Math.floor(leftinPx + (widthBoxPx/2))
   center.row = Math.floor(topinPx + (heightBoxPx/2))
 
-  return center
+  callback(null, center)
 }
