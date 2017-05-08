@@ -21,7 +21,8 @@ function Receive (sqs, callback) {
     if (err) {
     console.log('Receive error', err)
     callback(err)
-    } else {
+  } else {
+    console.log('recieve Message ' + data)
       var s3Link = data.Messages[0].MessageAttributes.source.StringValue
       // deleteMessage(sqs, data)
       var s3Params = parseSQS(s3Link)
